@@ -1,0 +1,88 @@
+<!-- TITLE -->
+<mat-card class="mb-40">
+    <h1>{{#capitalize crudResource.name}}{{/capitalize}} List</h1>
+</mat-card>
+
+<!-- SEARCH FORM -->
+<mat-card>
+    
+    <div class="card-title">
+        <mat-icon>search</mat-icon>
+        Search
+    </div>
+        
+    <form name="form-search" class="container-fluid">
+
+        <div class="row">
+            {{#each crudResource._entity._attrs}}
+            {{#notEmpty _enum}}
+                <div class="col-sm-6">
+                    <mat-form-field class="full-width">
+                        <mat-select placeholder="{{#firstUpperCase name}}{{/firstUpperCase}}" class="full-width" [(ngModel)]="search.{{name}}" name="{{name}}" id="{{name}}">
+                            <mat-option></mat-option>
+                            {{#each _enum}}
+                            <mat-option value="{{name}}">{{name}}</mat-option>
+                            {{/each}}
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="clearfix"></div>
+            {{/notEmpty}}
+			{{#isEmptyNull _enum}}
+			
+			    {{#equal type 'Boolean'}}
+                <mat-checkbox [(ngModel)]="search.{{name}}" name="{{name}}" id="{{name}}">{{capitalize name}}</mat-checkbox>
+                {{/equal}}
+                {{#notEqual type 'Boolean'}}
+                <div class="col-sm-6">
+                    <mat-form-field class="full-width">
+                        <input matInput type="{{#equal type 'Boolean'}}checkbox{{/equal}}{{#equal type 'Date'}}date{{/equal}}{{#equal type 'Number'}}number{{/equal}}{{#equal type 'Integer'}}number{{/equal}}{{#notEqual type 'Boolean'}}{{#notEqual type 'Integer'}}{{#notEqual type 'Date'}}{{#notEqual type 'Number'}}text{{/notEqual}}{{/notEqual}}{{/notEqual}}{{/notEqual}}" placeholder="{{#firstUpperCase name}}{{/firstUpperCase}}" [(ngModel)]="search.{{name}}" name="{{name}}" id="{{name}}">
+                    </mat-form-field>
+                </div>
+            {{/notEqual}}
+            {{/isEmptyNull}}
+            {{/each}}
+        </div>
+
+    </form>
+</mat-card>
+
+<!-- TABLE -->
+<table class="table table-hover mt-40">
+    <thead>
+        <tr>
+            <th>_id</th>
+            {{#each crudResource._entity._attrs}}
+            <th>{{name}}</th>
+            {{/each}}
+            <th>Remove</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let item of list | search: { {{#each crudResource._entity._attrs}}'{{name}}': search.{{name}}{{#isNotLast ../crudResource._entity._attrs @index}}, {{/isNotLast}}{{/each}} }">
+            <td><a [routerLink]="['/{{ lowercase crudResource.name}}s', item._id]">\{{item._id}}</a></td>
+            
+            <!-- ATTRIBUTES -->
+            {{#each crudResource._entity._attrs}}{{#notEqual type 'Date'}}
+            <td>\{{item.{{name}} }}</td>{{/notEqual}}{{#equal type 'Date'}}
+            <td>\{{item.{{name}} | date }}</td>{{/equal}}{{/each}}
+            
+            <!-- DELETE BUTTON -->
+            <td>
+                <button mat-icon-button (click)="openModal(item._id)" class="mt--10">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </td>
+        </tr>
+    </tbody>
+    <div class="no-result" *ngIf="(list | search: { {{#each crudResource._entity._attrs}} '{{name}}': search.{{name}} {{#isNotLast ../crudResource._entity._attrs @index}}, {{/isNotLast}}{{/each}} }).length == 0">
+        No items found
+    </div>
+</table>
+
+<!-- BUTTON -->
+<button class="btn btn-primary pull-right mb-20" routerLink="/{{lowercase crudResource.name}}s/new" mat-fab color="primary">
+    <mat-icon>add</mat-icon>
+</button>
+
+<div class="clearfix"></div>

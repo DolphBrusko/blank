@@ -1,0 +1,123 @@
+**** PROPERTIES SKAFFOLDER ****
+{
+    "forEachObj": "oneTime",
+    "overwrite": false,
+    "_partials": [
+        {
+            "template": "// Do not edit this comment content, it will be overwritten in next Skaffolder generation\r\nimport { HomeComponent } from './pages/home/home.component';\r\n{{#distinctModules modules}}\r\n{{#notHome name}}\r\nimport { {{capitalize name}}Component } from './pages/{{toFileName name}}/{{toFileName name}}.component';\r\n{{/notHome}}\r\n{{/distinctModules}}",
+            "tagTo": "/* END MY VIEWS IMPORTS*/",
+            "tagFrom": "/* START MY VIEWS IMPORTS*/",
+            "name": "Partial Import Components"
+        },
+        {
+            "template": "// Do not edit this comment content, it will be overwritten in next Skaffolder generation\r\n{{#each resources}}\r\n{{#each _resources}}\r\nimport { {{capitalize name}}Service } from './services/{{toFileName name}}.service';\r\n{{/each}}\r\n{{/each}}",
+            "tagTo": "/* END MY SERVICES IMPORTS*/",
+            "tagFrom": "/* START MY SERVICES IMPORTS*/",
+            "name": "Partial Import Services"
+        },
+        {
+            "template": "// Do not edit this comment content, it will be overwritten in next Skaffolder generation\n    HomeComponent,\n{{#each modules}}\n{{#notHome name}}\n    {{capitalize name}}Component,\n{{/notHome}}\n{{/each}}",
+            "tagTo": "/* END DECLARATIONS */",
+            "tagFrom": "/* START DECLARATIONS */",
+            "name": "Partial Declarations"
+        },
+        {
+            "template": "// Do not edit this comment content, it will be overwritten in next Skaffolder generation\r\n{{#each resources}}\r\n{{#each _resources}}\r\n    {{capitalize name}}Service,\r\n{{/each}}\r\n{{/each}}",
+            "tagTo": "/* END PROVIDERS */",
+            "tagFrom": "/* START PROVIDERS */",
+            "name": "Partial Providers"
+        }
+    ]
+}
+**** END PROPERTIES SKAFFOLDER ****
+// DEPENDENCIES
+import { NgModule }       from '@angular/core';
+import { BrowserModule }  from '@angular/platform-browser';
+import { FormsModule }    from '@angular/forms';
+import { HttpModule, RequestOptions } from '@angular/http';
+import { AppRoutingModule }     from './app-routing.module';
+import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
+
+
+// SECURITY
+import { SecurityService } from './security/services/security.service';
+import { TokenEmitter } from './security/token-emitter';
+import { TokenInterceptor } from './security/token-interceptor';
+import { AuthenticationService } from './security/authentication.service';
+import { AuthGuard } from "./security/auth.guard";
+
+// SECURITY VIEWS
+import { ManageUserListComponent } from './security/manage-user/list-user/manage-user-list.component';
+import { ManageUserEditComponent } from './security/manage-user/edit-user/manage-user-edit.component';
+import { ProfileComponent } from './security/profile/profile.component';
+import { ModalChangePasswordComponent } from './components/modal-change-password.component';
+import { LoginComponent } from './pages/login/login.component';
+
+/* START MY VIEWS IMPORTS*/
+/* END MY VIEWS IMPORTS*/
+
+/* START MY SERVICES IMPORTS*/
+/* END MY SERVICES IMPORTS*/
+
+// LAYOUT
+import { AppComponent }  from './app.component';
+import { NavbarComponent } from './components/navbar.component';
+import { SearchPipe } from './pipes/search.pipe';
+import { MaterialModule } from "./material.module";
+import { ModalRemoveComponent } from './components/modal-remove.component';
+
+//DIRECTIVES
+import { EqualValidator } from './directives/equal-validate.directive';
+import { MailValidator } from './directives/mail-validate.directive';
+
+// DECLARE APPLICATION MODULE
+@NgModule({
+  bootstrap: [ 
+    AppComponent 
+  ],
+  imports: [  
+    AppRoutingModule, // ROUTES
+    MaterialModule, // MATERIAL THEME
+    BrowserModule,
+    BrowserAnimationsModule, 
+    FormsModule,
+    HttpModule
+  ],
+  declarations: [
+    // LAYOUT
+    AppComponent, 
+    NavbarComponent,
+    ModalRemoveComponent,
+    EqualValidator,
+    MailValidator,
+    
+     // SECURITY
+    LoginComponent,
+    ProfileComponent,
+    ManageUserListComponent,
+    ManageUserEditComponent,
+    ModalChangePasswordComponent,
+    
+    /* START DECLARATIONS */
+    /* END DECLARATIONS */
+    
+    // PIPE
+    SearchPipe
+  ],
+  entryComponents: [
+    ModalRemoveComponent,
+    ModalChangePasswordComponent
+  ],
+  providers:    [
+    /* START PROVIDERS */
+    /* END PROVIDERS */
+    
+    // SECURITY
+    AuthGuard,
+    AuthenticationService,
+    SecurityService,
+    TokenEmitter,
+    {provide: RequestOptions, useClass: TokenInterceptor}
+  ],
+})
+export class AppModule { }

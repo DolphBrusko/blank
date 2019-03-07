@@ -1,0 +1,64 @@
+**** PROPERTIES SKAFFOLDER ****
+{
+    "forEachObj": "db",
+    "_partials": []
+}
+**** END PROPERTIES SKAFFOLDER ****
+<!-- TITLE -->
+<mat-card class="mb-40">
+    <h1>Manage User</h1>
+</mat-card>
+
+<!-- SEARCH FORM -->
+<mat-card class="mb-40">
+    <div class="card-title">
+        <mat-icon>search</mat-icon>
+        Search
+    </div>
+
+    <form #skaffolderForm="ngForm" class="container-fluid">
+
+        <mat-form-field class="full-width">
+            <input matInput type="text" placeholder="Username" #username='ngModel' [(ngModel)]="search.username" name="username" id="username">
+        </mat-form-field>
+        
+        {{#each db._resources}}{{#equal name 'User'}}{{#each _entity._attrs}}{{#notEqual name 'username'}}{{#notEqual name 'password'}}{{#notEqual name 'roles'}}
+        <mat-form-field class="full-width">
+            <input matInput type="{{lowercase type}}" placeholder="{{name}}" #{{lowercase name}}='ngModel' [(ngModel)]="search.{{lowercase name}}" name="{{lowercase name}}" id="{{lowercase name}}" {{#equal required true}}reqired{{/equal}}>
+        </mat-form-field>
+        {{/notEqual}}{{/notEqual}}{{/notEqual}}{{/each}}{{/equal}}{{/each}}
+        </form>
+</mat-card>
+
+<!-- TABLE LIST -->
+<table class="table table-hover mt-40">
+    <thead>
+        <tr>
+            <th>Username</th>
+            {{#each db._resources}}{{#equal name 'User'}}{{#each _entity._attrs}}{{#notEqual name 'username'}}{{#notEqual name 'password'}}{{#notEqual name 'roles'}}
+            <th>{{capitalize name}}</th>
+            {{/notEqual}}{{/notEqual}}{{/notEqual}}{{/each}}{{/equal}}{{/each}}
+            <th>Roles</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let user of users | search:{'username' : search.username, 'name' : search.name, 'surname' : search.surname, 'mail' : search.mail, 'roles' : search.role }">
+            <td><a [routerLink]="['/manage-users/', user._id]">\{{user.username}}</a></td>
+            {{#each db._resources}}{{#equal name 'User'}}{{#each _entity._attrs}}{{#notEqual name 'username'}}{{#notEqual name 'password'}}{{#notEqual name 'roles'}}
+            <td>\{{user.{{lowercase name}} }}</td>
+            {{/notEqual}}{{/notEqual}}{{/notEqual}}{{/each}}{{/equal}}{{/each}}
+            <td>
+                <mat-chip-list class="">
+                    <mat-chip *ngFor="let role of user.roles" selected="true" color="primary">
+                        \{{role}}
+                    </mat-chip>
+                </mat-chip-list>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- BUTTON -->
+<button class="btn btn-primary pull-right mb-20" routerLink="/manage-users/new" mat-fab color="primary">
+    <mat-icon>add</mat-icon>
+</button>

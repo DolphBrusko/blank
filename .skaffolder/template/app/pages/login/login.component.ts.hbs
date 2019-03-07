@@ -1,0 +1,55 @@
+**** PROPERTIES SKAFFOLDER ****
+{
+    "forEachObj": "oneTime",
+    "_partials": []
+}
+**** END PROPERTIES SKAFFOLDER ****
+import { Observable } from 'rxjs/Rx';
+import { AuthenticationService } from '../../security/authentication.service';
+import { Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { sha3_512 } from 'js-sha3';
+
+/**
+ * Component for manage login
+ */
+@Component({
+    templateUrl: './login.component.html'
+})
+export class LoginComponent {
+    username: string = "";
+    password: string = "";
+    remember: boolean = false;
+    showError: boolean = false;
+
+    constructor(
+        private router: Router,
+        private authenticationService: AuthenticationService
+    ){ }
+
+    closeError = function(){
+        this.showError = null;
+    }
+
+    /**
+     * Login action
+     */
+    login() {
+        const sha3pass = sha3_512(this.password).toString();
+        this.authenticationService.login(this.username, sha3pass, this.remember).subscribe(result => {
+            if (result == true) {
+                this.router.navigate(['/']);
+            } else {
+                // show login error
+                if (this.showError) {
+                    this.closeError();
+                    setTimeout(()=>{
+                        this.showError = true; 
+                }, 100);
+                } else {
+                    this.showError = true; 
+                }
+            }
+        });
+    }
+}

@@ -1,0 +1,123 @@
+// Import Libraries
+import { ActivatedRoute, Params } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
+
+// Import Services
+{{#eachResource module._services}}
+import { {{capitalize name }}Service } from '../../services/{{toFileName name}}.service';
+{{/eachResource}}
+
+// Import Models
+import { {{capitalize crudResource.name}} } from '../../domain/{{getDbNameToFileName dbs crudResource._db}}/{{toFileName crudResource.name}}';
+{{#each crudResource._relations}}
+{{#equal _ent1._id ../crudResource._entity._id}}
+import { {{capitalize _ent2.name}} } from '../../domain/{{getDbNameToFileName ../dbs _ent2._resource._db}}/{{toFileName _ent2._resource.name}}';{{/equal}}{{#notEqual _ent1._id ../crudResource._entity._id}}
+import { {{#capitalize _ent1.name}}{{/capitalize}} } from '../../domain/{{getDbNameToFileName ../dbs _ent2._resource._db}}/{{toFileName _ent1._resource.name}}';
+{{/notEqual}}
+{{/each}}
+
+// START - USED SERVICES		
+// END - USED SERVICES
+
+// START - REQUIRED RESOURCES		
+// END - REQUIRED RESOURCES
+
+/**
+ * Edit component for {{module.name}}
+ */
+@Component({
+    selector: '{{toFileName module.name}}',
+    templateUrl : './{{toFileName module.name}}.component.html',
+    styleUrls: ['./{{toFileName module.name}}.component.css']
+})
+export class {{#capitalize module.name}}{{/capitalize}}Component implements OnInit {
+
+    item: {{#capitalize crudResource.name}}{{/capitalize}};
+    {{#each crudResource._relations}}
+    list{{#capitalize name}}{{/capitalize}}: {{#capitalize _ent2.name}}{{/capitalize}}[];
+    {{/each}}
+    {{#each crudResource._relations}}
+	{{#notEqual _ent1._id ../crudResource._entity._id}}
+	external{{#capitalize _ent1.name}}{{/capitalize}}: {{#capitalize _ent1.name}}{{/capitalize}}[];
+	{{/notEqual}}
+	{{/each}}
+    model: {{#capitalize crudResource.name}}{{/capitalize}};
+    
+    constructor({{#eachResource module._services}}
+        private {{lowercase name }}Service: {{capitalize name}}Service,{{/eachResource}}
+        private route: ActivatedRoute,
+        private location: Location) {
+        // Init item
+        this.item = new {{#capitalize crudResource.name}}{{/capitalize}}();
+        {{#each crudResource._relations}}
+	   {{#notEqual _ent1._id ../crudResource._entity._id}}
+	   this.external{{capitalize _ent1.name}} = [];
+	   {{/notEqual}}
+	   {{/each}}
+    }
+
+    ngOnInit(): void {
+            this.route.params.subscribe(param => {
+                let id: string = param['id'];
+                if (id !== 'new') {
+                    // Get item from server 
+                    this.{{lowercase crudResource.name}}Service.get(id).subscribe(item => this.item = item);
+                    
+                    {{#each crudResource._relations}}{{#notEqual _ent1._id ../crudResource._entity._id}}
+                    this.{{lowercase _ent1.name}}Service.findBy{{capitalize name}}(id).subscribe(list => this.external{{#capitalize _ent1.name}}{{/capitalize}} = list);
+                    {{/notEqual}}{{/each}}
+                }
+                {{#each crudResource._relations}}
+                {{#equal _ent1._id ../crudResource._entity._id}}
+                this.{{lowercase _ent2.name}}Service.list().subscribe(list => this.list{{#capitalize name}}{{/capitalize}} = list);
+                {{/equal}}
+                {{/each}}
+            });
+    }
+
+    /**
+     * Save Item
+     */
+    save (formValid:boolean, item: {{capitalize crudResource.name}}): void{
+        if (formValid) {
+            if(item._id){
+                this.{{lowercase crudResource.name}}Service.update(item).subscribe(data => this.goBack());
+            } else {
+                this.{{lowercase crudResource.name}}Service.create(item).subscribe(data => this.goBack());
+            }  
+        }
+    }
+
+    /**
+     * Go Back
+     */
+    goBack(): void {
+        this.location.back();
+    }
+    
+    {{#each crudResource._relations}}
+    {{#equal _ent1._id ../crudResource._entity._id}}
+    {{#equal type 'm:m'}}
+    /**
+     * {{#capitalize _ent2.name}}{{/capitalize}} Relations utils functions
+     */
+    contain{{#capitalize _ent2.name}}{{/capitalize}}(id: string){
+        if(!this.item.{{name}}) return false;
+        return this.item.{{name}}.indexOf(id) != -1;
+    }
+    
+    add{{#capitalize _ent2.name}}{{/capitalize}}(id: string) {
+        if(!this.item.{{name}})
+            this.item.{{name}} = [];
+        this.item.{{name}}.push(id);
+    }
+    
+    remove{{#capitalize _ent2.name}}{{/capitalize}}(index: number) {
+        this.item.{{name}}.splice(index,1);
+    }
+    {{/equal}}
+    {{/equal}}
+    {{/each}}
+
+}

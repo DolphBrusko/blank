@@ -1,0 +1,48 @@
+**** PROPERTIES SKAFFOLDER ****
+{
+    "forEachObj": "resource",
+    "_partials": []
+}
+**** END PROPERTIES SKAFFOLDER ****
+// DEPENDENCIES
+import { Observable } from 'rxjs/Rx';
+import { Http, RequestOptions, Headers, Response } from '@angular/http';
+import { Injectable } from '@angular/core';
+import 'rxjs/add/operator/map';
+
+// SECURITY
+import { AuthenticationService } from '../security/authentication.service';
+
+// CONFIG
+import { config } from "../../config/properties";
+
+// MODEL
+import { {{capitalize resource.name}}BaseService } from "./base/{{toFileName resource.name}}.base.service";
+import { {{capitalize resource.name}} } from '../domain/{{toFileName db.name}}/{{toFileName resource.name}}';
+
+/**
+ * YOU CAN OVERRIDE HERE {{resource.name}}BaseService
+ */
+
+@Injectable()
+export class {{#capitalize resource.name}}{{/capitalize}}Service extends {{#capitalize resource.name}}{{/capitalize}}BaseService {
+    
+    // CONSTRUCTOR
+    constructor(http: Http, authenticationService: AuthenticationService) {
+            super(http, authenticationService);
+    }
+    
+    {{#equal resource.type 'User'}}
+    /**
+     * Change user password
+     */
+    changePassword(id: string, passwordNew:string, passwordAdmin:string): Observable<void> {
+        return this.http
+            .post(this.contextUrl + '/' + id + '/changePassword' , {
+                passwordNew: passwordNew, 
+                passwordAdmin: passwordAdmin 
+            })
+            .map(response => response.json());
+    }
+    {{/equal}}
+}

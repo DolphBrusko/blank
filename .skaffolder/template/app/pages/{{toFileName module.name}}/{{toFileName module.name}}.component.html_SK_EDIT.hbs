@@ -1,0 +1,107 @@
+<!-- TITLE -->
+<mat-card class="mb-40">
+    <h1>{{#capitalize crudResource.name}}{{/capitalize}} Edit</h1>
+</mat-card>
+
+<mat-card>
+    <div class="card-title">
+        <mat-icon>edit</mat-icon>
+        Edit
+    </div>
+
+    <form #skaffolderForm="ngForm" class="container-fluid">
+        {{#each crudResource._entity._attrs}}
+        {{#notEmpty _enum}}
+        
+        <mat-form-field class="full-width">
+            <mat-select placeholder="{{#firstUpperCase name}}{{/firstUpperCase}}" class="full-width" [(ngModel)]="item.{{name}}" name="{{name}}" id="{{name}}">
+                <mat-option></mat-option>
+            {{#each _enum}}
+                <mat-option value="{{name}}">{{name}}</mat-option>
+            {{/each}}
+            <div class="clearfix"></div>
+            </mat-select>
+        </mat-form-field>
+            
+        {{/notEmpty}}
+        {{#isEmptyNull _enum}}
+        
+        {{#equal type 'Boolean'}}
+        <mat-checkbox [(ngModel)]="item.{{name}}" name="{{name}}" id="{{name}}">{{capitalize name}}</mat-checkbox>
+        {{/equal}}
+        
+        {{#notEqual type 'Boolean'}}
+        <mat-form-field class="full-width">
+            <input matInput type="{{#equal type 'Date'}}date{{/equal}}{{#equal type 'Number'}}number{{/equal}}{{#equal type 'Integer'}}number{{/equal}}{{#notEqual type 'Boolean'}}{{#notEqual type 'Integer'}}{{#notEqual type 'Date'}}{{#notEqual type 'Number'}}text{{/notEqual}}{{/notEqual}}{{/notEqual}}{{/notEqual}}" placeholder="{{#firstUpperCase name}}{{/firstUpperCase}}"{{#equal type 'Date'}} [ngModel]="item.{{name}} | date: 'y-MM-dd'"{{/equal}} {{#notEqual type 'Date'}}[(ngModel)]="item.{{name}}"{{/notEqual}} {{#equal type 'Date'}}(ngModelChange)="item.{{name}} = $event"{{/equal}} name="{{name}}" id="{{name}}" {{#notEmpty required}}required{{/notEmpty}}>
+        </mat-form-field>
+        {{/notEqual}}
+        {{/isEmptyNull}}
+        {{/each}}
+        
+        {{#notEmpty crudResource._relations}}
+        <!-- RELATIONS -->
+        {{#checkRelation crudResource._relations crudResource._entity}}<h2 class="mb-20">Relations</h2>{{/checkRelation}}
+        {{/notEmpty}}
+        
+        {{#each crudResource._relations}}
+        {{#equal _ent1._id ../crudResource._entity._id}}
+        {{#equal type 'm:m'}}
+        
+            <div>
+            <label class="mr-10">{{name}}</label>
+            <button mat-mini-fab [matMenuTriggerFor]="{{lowercase _ent2.name}}" color="primary">
+                <mat-icon>add</mat-icon>            
+                <mat-menu #{{lowercase _ent2.name}}="matMenu">
+                    <button mat-menu-item *ngFor="let item of list{{#capitalize name}}{{/capitalize}}" [disabled]="contain{{#firstUpperCase _ent2.name}}{{/firstUpperCase}}(item._id) ? true : false" href="#" (click)="$event.preventDefault(); contain{{#firstUpperCase _ent2.name}}{{/firstUpperCase}}(item._id) || add{{#firstUpperCase _ent2.name}}{{/firstUpperCase}}(item._id)">\{{item._id}}</button>
+                </mat-menu>
+            </button>
+        </div>
+        <mat-list>
+            <mat-list-item *ngFor="let obj of item.{{lowercase name}}; let i = index">    
+                <button mat-icon-button (click)="remove{{#firstUpperCase _ent2.name}}{{/firstUpperCase}}(i)" class="mr-10">
+                    <mat-icon>delete</mat-icon>
+                </button>
+                \{{obj}}
+            </mat-list-item>
+            
+            <mat-list-item *ngIf="!item.{{lowercase name}} || item.{{lowercase name}}.length == 0">
+                No items found 
+            </mat-list-item>
+        </mat-list>
+        {{/equal}}
+        
+        {{#notEqual type 'm:m'}}
+        
+        <mat-form-field class="full-width mt-20">
+            <mat-select placeholder="{{_ent2.name}}" class="full-width" #{{name}}='ngModel' [(ngModel)]="item.{{name}}" name="{{name}}" id="{{name}}" required>
+                 <mat-option *ngFor="let item of list{{#capitalize name}}{{/capitalize}}" value="\{{item._id}}">
+                   \{{item._id}}
+                </mat-option>
+           </mat-select>
+        </mat-form-field>   
+        {{/notEqual}}
+        {{/equal}}   
+        {{/each}}
+        
+        {{#notEmpty crudResource._relations}}
+        {{#checkExternalRelation crudResource._relations crudResource._entity}}<h2 *ngIf="{{#each crudResource._relations}}{{#notEqual _ent1._id ../crudResource._entity._id}}external{{capitalize _ent1.name}}[0]{{#isNotLastRelations ../crudResource._relations ../crudResource._entity @index}} || {{/isNotLastRelations}}{{/notEqual}}{{/each}}">External Relations</h2>{{/checkExternalRelation}}
+        {{/notEmpty}}
+        
+		{{#each crudResource._relations}}
+				{{#notEqual _ent1._id ../crudResource._entity._id}}
+			<h3 *ngIf="external{{capitalize _ent1.name}}[0]">{{capitalize _ent1.name}}</h3>
+			<mat-list>
+                <mat-list-item *ngFor="let item of external{{#capitalize _ent1.name}}{{/capitalize}}">\{{item._id}}</mat-list-item>
+            </mat-list>
+				{{/notEqual}}
+		{{/each}}
+
+
+        <!-- BUTTON BAR -->
+        <div class="mt-40">
+            <button mat-raised-button color="primary" class="pull-right mr-5" (click)="save(skaffolderForm.valid, item)">Save</button>
+            <button mat-raised-button class="pull-right " (click)="goBack()">Back To List</button>
+        </div>
+    </form>
+
+</mat-card>
