@@ -54,7 +54,7 @@ const routes: Routes = [
 
     /* START MY VIEWS */
 
-    { path: 'home',  component: HomeComponent , canActivate: [AuthGuard] },
+    { path: 'home',  component: HomeComponent  },
 
  /* END MY VIEWS */
     
